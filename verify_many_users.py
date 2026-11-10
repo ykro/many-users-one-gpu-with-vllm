@@ -1,4 +1,4 @@
-"""The Outside Judge for C3: runs the five experiments once and checks what must hold.
+"""The Outside Judge for many users on one GPU: runs the five experiments once and checks what must hold.
 
     python verify_many_users.py          # live vLLM through the tunnel (real numbers)
     python verify_many_users.py --mock   # fake server, checks the logic without a GPU

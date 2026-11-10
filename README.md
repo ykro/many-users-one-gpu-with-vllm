@@ -3,7 +3,7 @@
 - **Por qué es relevante:** servir un modelo a una sola persona es fácil, porque cualquier servidor responde una petición tras otra. El problema aparece cuando llegan 50 a la vez. Una GPU que atiende a un usuario pasa casi todo el tiempo esperando, y la misma GPU puede escribir varias veces más tokens por segundo si atiende a muchos juntos. vLLM existe para aprovechar esa diferencia con tres ideas: continuous batching, PagedAttention (la KV-cache en bloques, como la memoria virtual de un sistema operativo) y prefix caching. Este repo las mide una por una con Gemma 4 en una GPU L4 de Cloud Run.
 - **Para quién es:** desarrolladores que saben Python y HTTP, que ya llamaron alguna API de IA y quieren entender qué pasa cuando su app tiene muchos usuarios. No hace falta saber machine learning, JAX ni PyTorch.
 - **Quién debería verlo:** quien tiene que decidir cuántos usuarios aguanta una GPU, por qué la latencia se dispara a partir de cierto punto, cuánto cuesta un millón de tokens con carga real o por qué un system prompt largo compartido sale más barato de lo que parece.
-- **Serie completa:** unidad C3 de la Serie C, servir modelos abiertos con vLLM ([vLLM for Software Devs Field Guide](https://github.com/ykro/vllm-for-software-devs-field-guide)). Viene después de [C1, tu primer servidor vLLM con Gemma](https://github.com/ykro/first-vllm-server-with-gemma), que termina justo con la pregunta de esta unidad.
+- **Serie completa:** tercera unidad del Field Guide de vLLM, servir modelos abiertos con vLLM ([vLLM for Software Devs Field Guide](https://github.com/ykro/vllm-for-software-devs-field-guide)). Viene después de [Tu primer servidor vLLM con Gemma](https://github.com/ykro/first-vllm-server-with-gemma), que termina justo con la pregunta de esta unidad.
 
 ---
 
@@ -132,7 +132,7 @@ gcloud run services proxy vllm-gemma --region us-east4 --port 8000
 make verify-live
 ```
 
-La corrida en vivo toma unos minutos. El primer request después de un rato sin uso espera el arranque en frío de la GPU. Si ya desplegaste el servicio en C1, `make deploy` lo actualiza con los flags de esta unidad (`--max-num-seqs`, `--enable-prefix-caching` y la concurrency de Cloud Run).
+La corrida en vivo toma unos minutos. El primer request después de un rato sin uso espera el arranque en frío de la GPU. Si ya desplegaste el servicio de `first-vllm-server-with-gemma`, `make deploy` lo actualiza con los flags de esta unidad (`--max-num-seqs`, `--enable-prefix-caching` y la concurrency de Cloud Run).
 
 Para ver un experimento con detalle mientras el túnel está abierto:
 
