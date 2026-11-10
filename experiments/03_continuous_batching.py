@@ -21,13 +21,13 @@ from vllm_lab import cli, make_client, stream_chat
 from vllm_lab.load import Job, percentile, run_jobs
 
 ROOT = Path(__file__).resolve().parent.parent
-LONG_TOKENS = 160
+LONG_TOKENS = 320        # long enough to still be writing after the last short one ends
 SHORT_TOKENS = 16
 N_LONG = 4
 N_SHORT = 8
 LONG_GAP_S = 0.05        # long requests start 50 ms apart
 SHORT_FIRST_S = 0.2      # the first short one arrives once the long ones are writing
-SHORT_GAP_S = 0.08
+SHORT_GAP_S = 0.06       # all shorts arrive in under 0.7 s; the longs need over 1.5 s
 
 
 def jobs() -> list[Job]:
