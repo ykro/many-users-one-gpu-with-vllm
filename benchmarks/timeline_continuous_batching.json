@@ -1,0 +1,119 @@
+{
+  "timeline": [
+    {
+      "id": "long-0",
+      "kind": "long",
+      "max_tokens": 320,
+      "sent_s": 0.0001,
+      "first_token_s": 0.3372,
+      "finished_s": 13.1554,
+      "tokens": 320
+    },
+    {
+      "id": "long-1",
+      "kind": "long",
+      "max_tokens": 320,
+      "sent_s": 0.0501,
+      "first_token_s": 0.3749,
+      "finished_s": 13.155,
+      "tokens": 320
+    },
+    {
+      "id": "long-2",
+      "kind": "long",
+      "max_tokens": 320,
+      "sent_s": 0.1011,
+      "first_token_s": 0.5193,
+      "finished_s": 13.1711,
+      "tokens": 320
+    },
+    {
+      "id": "long-3",
+      "kind": "long",
+      "max_tokens": 320,
+      "sent_s": 0.1511,
+      "first_token_s": 0.5189,
+      "finished_s": 13.2087,
+      "tokens": 320
+    },
+    {
+      "id": "short-0",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.2011,
+      "first_token_s": 0.551,
+      "finished_s": 1.2419,
+      "tokens": 16
+    },
+    {
+      "id": "short-1",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.2602,
+      "first_token_s": 0.5875,
+      "finished_s": 1.2448,
+      "tokens": 16
+    },
+    {
+      "id": "short-2",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.3211,
+      "first_token_s": 0.6695,
+      "finished_s": 1.2823,
+      "tokens": 16
+    },
+    {
+      "id": "short-3",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.3802,
+      "first_token_s": 0.7227,
+      "finished_s": 1.3326,
+      "tokens": 16
+    },
+    {
+      "id": "short-4",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.4411,
+      "first_token_s": 0.8428,
+      "finished_s": 1.4593,
+      "tokens": 16
+    },
+    {
+      "id": "short-5",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.5011,
+      "first_token_s": 0.8843,
+      "finished_s": 1.5711,
+      "tokens": 16
+    },
+    {
+      "id": "short-6",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.5602,
+      "first_token_s": 0.925,
+      "finished_s": 1.5699,
+      "tokens": 16
+    },
+    {
+      "id": "short-7",
+      "kind": "short",
+      "max_tokens": 16,
+      "sent_s": 0.6211,
+      "first_token_s": 1.0438,
+      "finished_s": 1.5731,
+      "tokens": 16
+    }
+  ],
+  "wall_s": 13.209,
+  "short_vs_earlier_long_pairs": 32,
+  "short_finished_first": 32,
+  "all_short_first": true,
+  "p50_short_latency_s": 0.985,
+  "p50_long_latency_s": 13.07,
+  "static_batching_p50_short_latency_s": 13.752
+}

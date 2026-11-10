@@ -1,0 +1,19 @@
+========================================================================================================
+THE OUTSIDE JUDGE — Many Users, One GPU with vLLM
+========================================================================================================
+Mode    : live
+Server  : vLLM 0.33.0 | model /models/google/gemma-4-E4B-it served as 'gemma' | KV capacity 111688 tokens
+Client  : Python 3.12.11 | Darwin arm64
+--------------------------------------------------------------------------------------------------------
+Experiment                     | Measured                               | Result                   | Check
+--------------------------------------------------------------------------------------------------------
+01. One by one vs together     | 8 req: 16.84 s -> 4.20 s               | 4.0x tok/s               | PASS
+02. Load sweep 1 -> 64 users   | p95 TTFT 387 -> 928 ms                 | 39.9x tok/s, knee -      | PASS
+03. Continuous batching        | short 0.99 s, long 13.05 s             | 32/32 overtakes          | PASS
+04. Paged KV-cache under load  | KV 1% -> 49%                           | waiting 54, preempt 0    | PASS
+05. Prefix caching             | TTFT shared 342 vs unique 754 ms       | hit rate 98.4%           | PASS
+--------------------------------------------------------------------------------------------------------
+Times include the network round trip through the tunnel and vary run to run.
+Load sweep at 64 users: 850 tok/s, $0.46 per 1M output tokens (1 user: $18.53).
+Judge run took 266.8 s.
+ALL CHECKS PASSED.

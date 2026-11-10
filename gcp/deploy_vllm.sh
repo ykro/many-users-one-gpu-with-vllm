@@ -20,6 +20,7 @@ MAX_LEN="${VLLM_MAX_MODEL_LEN:-8192}"
 GPU_MEM="${VLLM_GPU_MEMORY_UTILIZATION:-0.90}"  # lower it to shrink the KV-cache on purpose
 MAX_SEQS="${VLLM_MAX_NUM_SEQS:-64}"            # requests vLLM runs in one batch at most
 CONCURRENCY="${CLOUD_RUN_CONCURRENCY:-128}"    # must stay >= 64 for the load sweep
+MIN_INSTANCES="${MIN_INSTANCES:-0}"          # 1 keeps the GPU hot during a work session; set it back to 0
 BUCKET="${WEIGHTS_BUCKET:-${PROJECT_ID}-vllm-weights}"
 
 if (( CONCURRENCY < 64 )); then
@@ -51,7 +52,7 @@ gcloud run deploy "${SERVICE}" \
   ${SOURCE_FLAGS[@]+"${SOURCE_FLAGS[@]}"} \
   --gpu 1 --gpu-type nvidia-l4 --no-gpu-zonal-redundancy \
   --cpu 8 --memory 32Gi --no-cpu-throttling \
-  --min-instances 0 --max-instances 1 --concurrency "${CONCURRENCY}" --timeout 900 \
+  --min-instances "${MIN_INSTANCES:-0}" --max-instances 1 --concurrency "${CONCURRENCY}" --timeout 900 \
   --startup-probe "httpGet.path=/health,httpGet.port=8080,periodSeconds=10,failureThreshold=150,timeoutSeconds=5" \
   --no-allow-unauthenticated
 

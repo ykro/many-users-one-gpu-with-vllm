@@ -1,0 +1,55 @@
+{
+  "metrics_found": {
+    "kv_cache_usage": true,
+    "requests_running": true,
+    "requests_waiting": true,
+    "preemptions": true
+  },
+  "kv_capacity_tokens": 39966,
+  "prompt_tokens": 103,
+  "output_tokens_per_request": 677,
+  "rows": [
+    {
+      "users": 1,
+      "kv_tokens_requested": 780,
+      "peak_kv_cache_usage_pct": 2.2,
+      "peak_running": 1,
+      "peak_waiting": 0,
+      "preemptions": 0,
+      "wall_s": 26.48,
+      "samples": 65
+    },
+    {
+      "users": 8,
+      "kv_tokens_requested": 6240,
+      "peak_kv_cache_usage_pct": 17.8,
+      "peak_running": 8,
+      "peak_waiting": 0,
+      "preemptions": 0,
+      "wall_s": 30.15,
+      "samples": 79
+    },
+    {
+      "users": 32,
+      "kv_tokens_requested": 24960,
+      "peak_kv_cache_usage_pct": 71.2,
+      "peak_running": 32,
+      "peak_waiting": 0,
+      "preemptions": 0,
+      "wall_s": 34.09,
+      "samples": 88
+    },
+    {
+      "users": 64,
+      "kv_tokens_requested": 49920,
+      "peak_kv_cache_usage_pct": 100.0,
+      "peak_running": 64,
+      "peak_waiting": 40,
+      "preemptions": 20,
+      "wall_s": 56.53,
+      "samples": 146
+    }
+  ],
+  "kv_usage_rises": true,
+  "requests_waited": true
+}

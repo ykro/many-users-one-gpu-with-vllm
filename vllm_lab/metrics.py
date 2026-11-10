@@ -70,9 +70,17 @@ def pick(rows: list[tuple[str, dict, float]], prefixes: tuple[str, ...],
 
 
 def kv_capacity_tokens(rows: list[tuple[str, dict, float]]) -> int | None:
-    """How many tokens fit in the KV-cache: num_gpu_blocks x block_size, if exposed."""
+    """How many tokens fit in the KV-cache, as the server itself reports it.
+
+    vLLM 0.33 publishes `kv_cache_size_tokens` (the same number as "GPU KV cache size" in its
+    startup log). num_gpu_blocks x block_size is only the fallback: with Gemma 4's hybrid
+    cache it overstates the capacity by about 2.4x (225,024 against 93,138 on an L4).
+    """
     for name, labels, _ in rows:
         if name.startswith(CACHE_CONFIG):
+            published = labels.get("kv_cache_size_tokens", "")
+            if published.isdigit():
+                return int(published)
             try:
                 return int(labels["num_gpu_blocks"]) * int(labels["block_size"])
             except (KeyError, ValueError):

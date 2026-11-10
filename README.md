@@ -29,22 +29,24 @@ Casi todas las apps mandan el mismo system prompt largo (reglas, catálogo, tono
 
 ## Resultados de verificación (`verify_many_users.py`)
 
-> **Pendiente de la corrida en vivo.** Las cifras de esta sección salen de `make verify-live` contra vLLM `0.33.0` con `google/gemma-4-E4B-it` en una NVIDIA L4 de Cloud Run (`us-east4`). El juez guarda la corrida en `benchmarks/latest_results.json` y la salida de terminal en `benchmarks/terminal_output.txt`; esta tabla se llena con esa misma corrida.
+Corrida en vivo del 2026-11-10 con `make report` contra vLLM `0.33.0` y `google/gemma-4-E4B-it` en bf16, una NVIDIA L4 de Cloud Run (`us-east4`), pesos desde un bucket, `--max-num-seqs 64` y `--gpu-memory-utilization 0.90` (KV-cache de 4.12 GiB, 111,688 tokens según vLLM). El juez pasa los 5 checks y tardó 266.8 s. Quedan guardadas `benchmarks/latest_results.json`, `benchmarks/terminal_output.txt`, `benchmarks/timeline_continuous_batching.json` y `benchmarks/paged_kv_cache_under_pressure.json`.
 
 | Experimento | Archivo | Qué mide | Resultado en L4 |
 | :--- | :--- | :--- | :--- |
-| **01. Uno por uno contra todos juntos** | `experiments/01_one_by_one_vs_together.py` | Tiempo total y tokens/s agregados de 8 peticiones en secuencia y en paralelo | Pendiente de la corrida en vivo |
-| **02. Barrido de carga de 1 a 64 usuarios** | `experiments/02_load_sweep.py` | TTFT p50 y p95, latencia entre tokens, throughput, dólares por millón de tokens y la rodilla de la curva | Pendiente de la corrida en vivo |
-| **03. Continuous batching** | `experiments/03_continuous_batching.py` | Línea de tiempo de 4 respuestas largas y 8 cortas que llegan después | Pendiente de la corrida en vivo |
-| **04. KV-cache paginada bajo carga** | `experiments/04_paged_kv_cache.py` | Uso de la KV-cache, peticiones activas, en espera y preemptions según `/metrics` | Pendiente de la corrida en vivo |
-| **05. Prefix caching** | `experiments/05_prefix_caching.py` | TTFT con system prompt compartido contra único y tasa de aciertos del prefix cache | Pendiente de la corrida en vivo |
+| **01. Uno por uno contra todos juntos** | `experiments/01_one_by_one_vs_together.py` | Tiempo total y tokens/s agregados de 8 peticiones en secuencia y en paralelo | 16.84 s contra 4.20 s; 22.8 contra 91.3 tokens/s (4.0 veces); cada usuario recibe 26.1 contra 25.2 tokens/s |
+| **02. Barrido de carga de 1 a 64 usuarios** | `experiments/02_load_sweep.py` | TTFT p50 y p95, latencia entre tokens, throughput, dólares por millón de tokens y la rodilla de la curva | De 21.3 a 850.4 tokens/s (39.9 veces); TTFT p95 de 387 a 928 ms (2.4 veces); entre tokens de 38 a 51 ms; de USD 18.53 a USD 0.46 por millón; sin rodilla hasta 64 usuarios |
+| **03. Continuous batching** | `experiments/03_continuous_batching.py` | Línea de tiempo de 4 respuestas largas y 8 cortas que llegan después | La respuesta corta tarda 0.99 s (mediana) y la larga 13.05 s; las cortas terminan primero en 32 de 32 parejas; con static batching, estimado 13.75 s |
+| **04. KV-cache paginada bajo carga** | `experiments/04_paged_kv_cache.py` | Uso de la KV-cache, peticiones activas, en espera y preemptions según `/metrics` | Con 111,688 tokens de capacidad, el uso sube de 1 % a 49 % de 1 a 64 usuarios, sin cola de KV ni preemptions. Con `--gpu-memory-utilization 0.78` (39,966 tokens) llega a 100 %, 40 peticiones en espera y 20 preemptions con 64 usuarios |
+| **05. Prefix caching** | `experiments/05_prefix_caching.py` | TTFT con system prompt compartido contra único y tasa de aciertos del prefix cache | TTFT 342 ms contra 754 ms (2.2 veces); 98.4 % de aciertos (18,688 de 18,995 tokens) contra 0 % |
+
+Costo con la instancia a USD 1.42 por hora: 1 usuario, USD 18.53 por millón de tokens de salida; 8, USD 2.74; 64, USD 0.46.
 
 ### Cómo leer estas cifras
 
 - **El juez revisa comportamiento.** Cada fila pasa si se cumple lo que la teoría predice: todos juntos dan más tokens/s que uno por uno, el TTFT p95 crece con la carga, cada respuesta corta termina antes que las largas que se enviaron antes, el uso de la KV-cache sube con la carga y un prefijo compartido arranca más rápido que uno único. Las cifras exactas cambian de una corrida a otra.
 - **La rodilla.** El experimento 02 marca como rodilla el primer nivel de usuarios donde el tiempo que espera cada usuario por su respuesta completa (p50) crece en un factor mayor que el throughput. A partir de ahí, sumar usuarios agrega sobre todo espera.
 - **El túnel cuenta.** Todos los tiempos incluyen el viaje de ida y vuelta por `gcloud run services proxy`, así que el TTFT medido es mayor que el que reporta vLLM por dentro.
-- **La KV-cache de la L4 es grande.** Si el servidor publica su capacidad (`vllm:cache_config_info`), el experimento 04 ajusta el largo de las respuestas para que el nivel más alto pida un 25 % más de KV-cache de la que existe, con un tope de 768 tokens por respuesta. Si aun así no ves peticiones en espera, despliega con `VLLM_GPU_MEMORY_UTILIZATION=0.6` para dejarle menos memoria a la KV-cache a propósito.
+- **La KV-cache de la L4 es grande.** Ojo, la capacidad en tokens es la que publica el servidor (`kv_cache_size_tokens`); `num_gpu_blocks` por el tamaño de bloque la sobreestima unas 2.4 veces con Gemma 4. Si el servidor publica su capacidad (`vllm:cache_config_info`), el experimento 04 ajusta el largo de las respuestas para que el nivel más alto pida un 25 % más de KV-cache de la que existe, con un tope de 768 tokens por respuesta. Con `0.90` el KV-cache de la L4 no se llenó (49 % con 64 usuarios). Para verlo llenarse, despliega con `VLLM_GPU_MEMORY_UTILIZATION=0.78`, que le deja a la KV-cache 1.47 GiB (los pesos ocupan unos 15 GiB, así que valores menores no arrancan).
 - **El modo `--mock` no mide nada real.** El servidor falso de `vllm_lab/mock_server.py` imita el scheduler de vLLM (pasos de decode que se alargan con cada petición activa, una KV-cache de solo 4,096 tokens en bloques de 16, preemption y prefix caching) para que `make all` revise la lógica sin GPU. Sus tiempos son inventados.
 
 ---
@@ -57,7 +59,9 @@ Casi todas las apps mandan el mismo system prompt largo (reglas, catálogo, tono
 │   ├── pricing.json                         # Precio por hora de la instancia L4 (revísalo antes de decidir)
 │   ├── latest_results.json                  # Lo escribe make verify-live
 │   ├── terminal_output.txt                  # Salida íntegra del juez en vivo
-│   └── timeline_continuous_batching.json    # Lo escribe el experimento 03 en vivo
+│   ├── timeline_continuous_batching.json    # Lo escribe el experimento 03 en vivo
+│   └── paged_kv_cache_under_pressure.json   # Experimento 04 con la KV-cache a 0.78 de utilización
+├── diagrams/                                # 3 diagramas blue-gold (html, svg, png)
 ├── experiments/
 │   ├── 01_one_by_one_vs_together.py         # Secuencia contra paralelo: un usuario deja la GPU ociosa
 │   ├── 02_load_sweep.py                     # De 1 a 64 usuarios: latencia contra throughput y la rodilla
@@ -123,6 +127,7 @@ export GCP_PROJECT_ID=<tu-proyecto>
 bash gcp/stage_weights.sh
 
 # Despliega vLLM 0.33.0 con Gemma 4 E4B, una sola instancia y concurrency 128
+# (MIN_INSTANCES=1 la mantiene caliente mientras mides; al terminar, make cool)
 make deploy
 
 # En otra terminal: el túnel autenticado hacia el servicio
